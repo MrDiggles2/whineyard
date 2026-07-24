@@ -12,10 +12,26 @@ POC that ingests DigitalOcean DBaaS exit feedback, stores it in managed Postgres
 
 ## Local run
 
+### Docker Compose (app + Postgres)
+
+```bash
+cp .env.example .env   # set MODEL_ACCESS_KEY for scoring (optional for UI/API smoke)
+docker compose up --build
+```
+
+- App: http://localhost:8080/
+- Postgres: `localhost:5432` (user/password/db: `ane` / `ane` / `whineyard`)
+- Schema is created automatically on app boot (`ensureSchema`)
+
+Stop with `Ctrl+C`, or `docker compose down`. Add `-v` to wipe the DB volume.
+
+### Node on the host
+
 ```bash
 nvm use   # or Node 22+
 npm install
 cp .env.example .env   # then edit DATABASE_URL / MODEL_ACCESS_KEY
+# optional: only start Postgres — docker compose up db -d
 npm run dev            # tsx; loads .env from project root
 # or: npm run build && npm start
 ```
