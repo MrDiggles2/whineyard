@@ -30,7 +30,15 @@ h1 {
   font-family: "IBM Plex Serif", Georgia, serif;
   font-weight: 600;
   font-size: 1.75rem;
+  margin: 0 0 0.35rem;
+}
+
+.tagline {
   margin: 0 0 1.25rem;
+  font-family: "IBM Plex Serif", Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--muted);
 }
 
 .filters {
