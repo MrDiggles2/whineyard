@@ -12,6 +12,7 @@ import type { BatchResultLine } from './batchFormat.js';
 
 const BATCH_SIZE = Number(process.env.BATCH_SIZE || 50);
 const POLL_MS = Number(process.env.WORKER_POLL_MS || 60_000);
+const MAX_IN_FLIGHT_BATCHES = Number(process.env.MAX_IN_FLIGHT_BATCHES || 5);
 const TERMINAL_FAIL = new Set(['failed', 'cancelled', 'expired']);
 
 let running = false;
@@ -51,16 +52,17 @@ export async function workerTick(): Promise<void> {
 
   await resolveSubmittedBatches(apiKey);
 
-  const inFlight = await countInFlight();
-  if (inFlight > 0) return;
+  const inFlight = await countInFlightBatches();
+  if (inFlight >= MAX_IN_FLIGHT_BATCHES) return;
 
   await submitPendingBatch(apiKey);
 }
 
-async function countInFlight(): Promise<number> {
+async function countInFlightBatches(): Promise<number> {
   const db = getPool();
   const result = await db.query<{ n: number }>(
-    `SELECT COUNT(*)::int AS n FROM feedback_entries WHERE status = 'submitted'`,
+    `SELECT COUNT(DISTINCT batch_id)::int AS n FROM feedback_entries
+     WHERE status = 'submitted' AND batch_id IS NOT NULL`,
   );
   return result.rows[0].n;
 }

@@ -54,7 +54,7 @@ No doctl required. The Dockerfile multi-stage builds TypeScript to `dist/`.
    - Attach a **managed Postgres** database (dev DB is fine for the POC)
    - Bind `DATABASE_URL` from the database
    - Add secret `MODEL_ACCESS_KEY` (Inference / model access key)
-   - Optional env: `MODEL_NAME=o3-mini`, `WORKER_POLL_MS=60000`
+   - Optional env: `MODEL_NAME=o3-mini`, `WORKER_POLL_MS=60000`, `MAX_IN_FLIGHT_BATCHES=5`
 4. Create / deploy from the console and open the app URL.
 
 Keep **instance count = 1**. The worker is in-process with no multi-instance locking.
