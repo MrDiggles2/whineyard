@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ANE Safari — Feedback</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main>
+    <h1>Exit feedback</h1>
+    <form id="filters" class="filters">
+      <label>
+        Tag
+        <input name="tag" type="text" placeholder="optional" />
+      </label>
+      <label>
+        Category
+        <select name="category">
+          <option value="">Any</option>
+          <option>COMPETITOR_CHURN</option>
+          <option>PRICING</option>
+          <option>NO_LONGER_NEEDED</option>
+          <option>ACCIDENT</option>
+          <option>PERFORMANCE</option>
+          <option>RELIABILITY</option>
+          <option>NOISE</option>
+          <option>MISSING_FEATURES</option>
+          <option>OTHER</option>
+        </select>
+      </label>
+      <label>
+        Actionability
+        <select name="actionability">
+          <option value="">Any</option>
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+        </select>
+      </label>
+      <label>
+        Sort
+        <select name="sort">
+          <option value="created_at">Created</option>
+          <option value="category">Category</option>
+          <option value="actionability">Actionability</option>
+        </select>
+      </label>
+      <label>
+        Order
+        <select name="order">
+          <option value="desc">Desc</option>
+          <option value="asc">Asc</option>
+        </select>
+      </label>
+      <button type="submit">Apply</button>
+    </form>
+
+    <p id="meta" class="meta"></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Created</th>
+            <th>Feedback</th>
+            <th>Tags</th>
+            <th>Category</th>
+            <th>Actionability</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <div class="pager">
+      <button type="button" id="prev" disabled>Previous</button>
+      <button type="button" id="next" disabled>Next</button>
+    </div>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
