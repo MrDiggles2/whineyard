@@ -13,7 +13,7 @@ One App Platform Node/Express service:
 - `public/` static UI
 - In-process worker (~60s) submits/polls DO Batches
 
-Managed Postgres via `DATABASE_URL`. Manual console deploy (`Dockerfile` + `app.yaml`). No doctl, no separate nginx/worker.
+Managed Postgres via `DATABASE_URL`. Manual console deploy (`Dockerfile` + `app.yaml`). No doctl, no separate nginx/worker. Batch HTTP calls go through `@digitalocean/dots` `InferenceClient`.
 
 ## Decisions
 

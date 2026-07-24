@@ -3,9 +3,8 @@ import { buildModelInput } from './prompt.js';
 import {
   buildJsonlLine,
   createBatch,
-  downloadText,
+  downloadBatchOutput,
   getBatch,
-  getBatchResults,
   parseScoreFromResultLine,
   uploadBatchFile,
 } from './batches.js';
@@ -89,13 +88,13 @@ async function resolveSubmittedBatches(apiKey) {
 
 async function applyCompletedBatch(apiKey, batchId) {
   const db = getPool();
-  const resultsMeta = await getBatchResults(apiKey, batchId);
-  if (!resultsMeta.result_available || !resultsMeta.output_file_url) {
-    console.warn(`batch ${batchId} completed but results not available yet`);
+  let text;
+  try {
+    text = await downloadBatchOutput(apiKey, batchId);
+  } catch (err) {
+    console.warn(`batch ${batchId} results not ready yet:`, err.message);
     return;
   }
-
-  const text = await downloadText(resultsMeta.output_file_url);
   const lines = text.split('\n').filter((l) => l.trim());
 
   for (const line of lines) {

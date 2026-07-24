@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { isUuid } from '../src/uuid.js';
 import { buildListFilters } from '../src/routes/feedback.js';
-import { buildJsonlLine, parseScoreFromResultLine } from '../src/batches.js';
+import { buildJsonlLine, parseScoreFromResultLine } from '../src/batchFormat.js';
 import { buildModelInput } from '../src/prompt.js';
 
 test('isUuid accepts valid UUIDs', () => {

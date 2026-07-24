@@ -6,6 +6,7 @@ POC that ingests DigitalOcean DBaaS exit feedback, stores it in managed Postgres
 
 - One Node/Express App Platform service (API + static UI + in-process scoring worker)
 - Managed Postgres
+- Batches client: [`@digitalocean/dots`](https://github.com/digitalocean/dots) `InferenceClient` (Node ≥ 20.10; Docker image uses Node 22)
 - Scoring prompt: [`prompt.md`](prompt.md)
 
 ## Local run

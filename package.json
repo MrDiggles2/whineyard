@@ -8,9 +8,10 @@
     "test": "node --test test/*.js"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20.10.0"
   },
   "dependencies": {
+    "@digitalocean/dots": "^1.18.0",
     "express": "^5.1.0",
     "pg": "^8.16.3"
   }
