@@ -11,6 +11,10 @@
     <h1>Exit feedback</h1>
     <form id="filters" class="filters">
       <label>
+        Keyword
+        <input name="q" type="text" placeholder="search feedback" />
+      </label>
+      <label>
         Tag
         <input name="tag" type="text" placeholder="optional" />
       </label>
@@ -27,6 +31,16 @@
           <option>NOISE</option>
           <option>MISSING_FEATURES</option>
           <option>OTHER</option>
+        </select>
+      </label>
+      <label>
+        Status
+        <select name="status">
+          <option value="">Any</option>
+          <option>pending</option>
+          <option>submitted</option>
+          <option>scored</option>
+          <option>failed</option>
         </select>
       </label>
       <label>

@@ -27,6 +27,21 @@ test('buildListFilters builds tag category actionability clauses', () => {
   assert.deepEqual(params, [JSON.stringify(['churn']), 'PRICING', 3]);
 });
 
+test('buildListFilters builds q and status clauses', () => {
+  const { whereSql, params } = buildListFilters({
+    q: 'post%gis_x',
+    status: 'scored',
+  });
+  assert.match(whereSql, /feedback ILIKE/);
+  assert.match(whereSql, /ESCAPE/);
+  assert.match(whereSql, /status =/);
+  assert.deepEqual(params, ['%post\\%gis\\_x%', 'scored']);
+});
+
+test('buildListFilters rejects invalid status', () => {
+  assert.throws(() => buildListFilters({ status: 'bogus' }), /invalid status/);
+});
+
 test('buildJsonlLine uses custom_id and model input', () => {
   const line = buildJsonlLine({
     customId: 'req-1',

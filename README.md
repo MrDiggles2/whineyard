@@ -65,11 +65,11 @@ Keep **instance count = 1**. The worker is in-process with no multi-instance loc
 2. `POST /feedback/550e8400-e29b-41d4-a716-446655440000` with a short feedback body → `201`.
 3. Refresh UI — row appears with `status=pending`.
 4. Wait for the worker (~60s + batch runtime) — status becomes `submitted`, then `scored` with category and actionability 1–5.
-5. Filter by category / actionability / tag; paginate if you have enough rows.
+5. Filter by keyword / category / actionability / tag / status; paginate if you have enough rows.
 
 ## API
 
 | Method | Path | Notes |
 |--------|------|--------|
 | `POST` | `/feedback/:formUuid` | `formUuid` must be a UUID; body `{ feedback, tags }` |
-| `GET` | `/api/feedback` | Query: `tag`, `category`, `actionability`, `sort`, `order`, `page`, `pageSize` |
+| `GET` | `/api/feedback` | Query: `q`, `tag`, `category`, `status`, `actionability`, `sort`, `order`, `page`, `pageSize` |

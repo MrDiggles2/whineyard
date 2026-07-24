@@ -1,9 +1,15 @@
 import { Router, type Request, type Response } from 'express';
 import { getPool } from '../db.js';
-import type { FeedbackDto, FeedbackRow } from '../types/feedback.js';
+import type { FeedbackDto, FeedbackRow, FeedbackStatus } from '../types/feedback.js';
 import { isUuid } from '../uuid.js';
 
 const SORT_COLUMNS = new Set(['created_at', 'actionability', 'category']);
+const ALLOWED_STATUSES = new Set<FeedbackStatus>([
+  'pending',
+  'submitted',
+  'scored',
+  'failed',
+]);
 
 export function createFeedbackRouter(): Router {
   const router = Router();
@@ -46,6 +52,8 @@ export function createFeedbackRouter(): Router {
         tag,
         category,
         actionability,
+        q,
+        status,
         sort = 'created_at',
         order = 'desc',
         page = '1',
@@ -60,27 +68,24 @@ export function createFeedbackRouter(): Router {
       const size = Math.min(100, Math.max(1, parseInt(String(pageSize), 10) || 20));
       const offset = (pageNum - 1) * size;
 
-      const where: string[] = [];
-      const params: unknown[] = [];
-
-      if (tag) {
-        params.push(JSON.stringify([String(tag)]));
-        where.push(`tags @> $${params.length}::jsonb`);
+      let whereSql: string;
+      let params: unknown[];
+      try {
+        ({ whereSql, params } = buildListFilters({
+          tag: tag ? String(tag) : undefined,
+          category: category ? String(category) : undefined,
+          actionability:
+            actionability !== undefined && actionability !== ''
+              ? String(actionability)
+              : undefined,
+          q: q ? String(q) : undefined,
+          status: status ? String(status) : undefined,
+        }));
+      } catch (err) {
+        return res.status(400).json({
+          error: err instanceof Error ? err.message : 'invalid filter',
+        });
       }
-      if (category) {
-        params.push(String(category));
-        where.push(`category = $${params.length}`);
-      }
-      if (actionability !== undefined && actionability !== '') {
-        const n = parseInt(String(actionability), 10);
-        if (Number.isNaN(n)) {
-          return res.status(400).json({ error: 'invalid actionability' });
-        }
-        params.push(n);
-        where.push(`actionability = $${params.length}`);
-      }
-
-      const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
       const db = getPool();
       const countResult = await db.query<{ total: number }>(
@@ -134,6 +139,13 @@ export interface ListFilterInput {
   tag?: string;
   category?: string;
   actionability?: string | number;
+  q?: string;
+  status?: string;
+}
+
+/** Escape LIKE/ILIKE metacharacters (and backslash) for use with ESCAPE '\\'. */
+export function escapeIlike(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
 }
 
 /** Build WHERE + params for list filters (exported for tests). */
@@ -141,6 +153,8 @@ export function buildListFilters({
   tag,
   category,
   actionability,
+  q,
+  status,
 }: ListFilterInput = {}): { where: string[]; params: unknown[]; whereSql: string } {
   const where: string[] = [];
   const params: unknown[] = [];
@@ -159,6 +173,18 @@ export function buildListFilters({
     }
     params.push(n);
     where.push(`actionability = $${params.length}`);
+  }
+  if (q !== undefined && String(q).trim() !== '') {
+    params.push(`%${escapeIlike(String(q).trim())}%`);
+    where.push(`feedback ILIKE $${params.length} ESCAPE '\\'`);
+  }
+  if (status !== undefined && status !== '') {
+    const s = String(status);
+    if (!ALLOWED_STATUSES.has(s as FeedbackStatus)) {
+      throw new Error('invalid status');
+    }
+    params.push(s);
+    where.push(`status = $${params.length}`);
   }
   return { where, params, whereSql: where.length ? `WHERE ${where.join(' AND ')}` : '' };
 }
