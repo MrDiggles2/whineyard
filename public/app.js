@@ -21,25 +21,74 @@ function paramsFromForm() {
   return params;
 }
 
+const CATEGORY_LABELS = {
+  COMPETITOR_CHURN: 'Competitor churn',
+  PRICING: 'Pricing',
+  NO_LONGER_NEEDED: 'No longer needed',
+  ACCIDENT: 'Accident',
+  PERFORMANCE: 'Performance',
+  RELIABILITY: 'Reliability',
+  NOISE: 'Noise',
+  MISSING_FEATURES: 'Missing features',
+  OTHER: 'Other',
+};
+
+const TAG_TONES = ['sage', 'clay', 'sky', 'plum', 'amber', 'teal'];
+
 function formatDate(value) {
   if (!value) return '';
   try {
-    return new Date(value).toLocaleString();
+    return new Date(value).toLocaleString(undefined, { timeZoneName: 'short', hour12: false });
   } catch {
     return String(value);
   }
+}
+
+function humanizeCategory(value) {
+  if (!value) return '';
+  if (CATEGORY_LABELS[value]) return CATEGORY_LABELS[value];
+  return String(value)
+    .toLowerCase()
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+function categoryClass(value) {
+  if (!value) return '';
+  return `category--${String(value).toLowerCase().replace(/_/g, '-')}`;
+}
+
+function tagTone(tag) {
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) hash = (hash * 31 + tag.charCodeAt(i)) >>> 0;
+  return TAG_TONES[hash % TAG_TONES.length];
+}
+
+function renderTags(tags) {
+  if (!Array.isArray(tags) || tags.length === 0) return '';
+  return `<div class="tag-list">${tags
+    .map(
+      (tag) =>
+        `<span class="tag-pill tag-pill--${tagTone(String(tag))}">${escapeHtml(String(tag))}</span>`,
+    )
+    .join('')}</div>`;
+}
+
+function renderCategory(value) {
+  if (!value) return '';
+  return `<span class="category ${categoryClass(value)}">${escapeHtml(humanizeCategory(value))}</span>`;
 }
 
 function render(items) {
   rowsEl.innerHTML = '';
   for (const item of items) {
     const tr = document.createElement('tr');
-    const tags = Array.isArray(item.tags) ? item.tags.join(', ') : '';
     tr.innerHTML = `
-      <td>${escapeHtml(formatDate(item.createdAt))}</td>
+      <td class="no-break">${escapeHtml(formatDate(item.createdAt))}</td>
       <td class="feedback">${escapeHtml(item.feedback || '')}</td>
-      <td>${escapeHtml(tags)}</td>
-      <td>${escapeHtml(item.category || '')}</td>
+      <td>${renderTags(item.tags)}</td>
+      <td>${renderCategory(item.category)}</td>
       <td>${item.actionability == null ? '' : escapeHtml(String(item.actionability))}</td>
       <td>${escapeHtml(item.status || '')}</td>
     `;

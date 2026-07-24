@@ -114,6 +114,113 @@ td.feedback {
   word-break: break-word;
 }
 
+.no-break {
+  white-space: nowrap;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag-pill {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.tag-pill--sage {
+  background: #dce8df;
+  color: #1f4d32;
+}
+
+.tag-pill--clay {
+  background: #f0ddd4;
+  color: #7a3b28;
+}
+
+.tag-pill--sky {
+  background: #d7e6f2;
+  color: #1f4a6e;
+}
+
+.tag-pill--plum {
+  background: #e6dcec;
+  color: #5a356e;
+}
+
+.tag-pill--amber {
+  background: #f3e6c8;
+  color: #6e4f12;
+}
+
+.tag-pill--teal {
+  background: #d5ebe8;
+  color: #1f5a52;
+}
+
+.category {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  background: #ebe6dc;
+  color: #3d3830;
+}
+
+.category--competitor-churn {
+  background: #f0ddd4;
+  color: #7a3b28;
+}
+
+.category--pricing {
+  background: #f3e6c8;
+  color: #6e4f12;
+}
+
+.category--no-longer-needed {
+  background: #e6e2dc;
+  color: #4a463f;
+}
+
+.category--accident {
+  background: #e8dce8;
+  color: #5c355c;
+}
+
+.category--performance {
+  background: #d7e6f2;
+  color: #1f4a6e;
+}
+
+.category--reliability {
+  background: #dce8df;
+  color: #1f4d32;
+}
+
+.category--noise {
+  background: #e4e4e8;
+  color: #4a4a55;
+}
+
+.category--missing-features {
+  background: #e6dcec;
+  color: #5a356e;
+}
+
+.category--other {
+  background: #d5ebe8;
+  color: #1f5a52;
+}
+
 .pager {
   display: flex;
   gap: 0.75rem;
