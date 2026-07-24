@@ -6,7 +6,8 @@ Ingest DBaaS exit feedback, persist it, score category + actionability via Digit
 
 ## Architecture
 
-One App Platform Node/Express service:
+- TypeScript Node/Express App Platform service (API + static UI + in-process scoring worker)
+- Batches via `@digitalocean/dots` `InferenceClient`
 
 - `POST /feedback/:formUuid` — ingest
 - `GET /api/feedback` — list with filter/sort/pagination

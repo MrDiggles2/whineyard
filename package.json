@@ -4,15 +4,26 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node src/server.js",
-    "test": "node --test test/*.js"
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "dev": "tsx src/server.ts",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "test": "tsx --test test/unit.ts"
   },
   "engines": {
     "node": ">=20.10.0"
   },
   "dependencies": {
     "@digitalocean/dots": "^1.18.0",
+    "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "@types/pg": "^8.15.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
   }
 }

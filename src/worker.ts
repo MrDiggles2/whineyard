@@ -8,15 +8,16 @@ import {
   parseScoreFromResultLine,
   uploadBatchFile,
 } from './batches.js';
+import type { BatchResultLine } from './batchFormat.js';
 
 const BATCH_SIZE = Number(process.env.BATCH_SIZE || 50);
 const POLL_MS = Number(process.env.WORKER_POLL_MS || 60_000);
 const TERMINAL_FAIL = new Set(['failed', 'cancelled', 'expired']);
 
 let running = false;
-let timer = null;
+let timer: ReturnType<typeof setInterval> | undefined;
 
-export function startWorker() {
+export function startWorker(): void {
   const tick = async () => {
     if (running) return;
     running = true;
@@ -29,17 +30,19 @@ export function startWorker() {
     }
   };
 
-  tick();
-  timer = setInterval(tick, POLL_MS);
-  if (typeof timer.unref === 'function') timer.unref();
+  void tick();
+  timer = setInterval(() => {
+    void tick();
+  }, POLL_MS);
+  timer.unref();
 }
 
-export function stopWorker() {
+export function stopWorker(): void {
   if (timer) clearInterval(timer);
-  timer = null;
+  timer = undefined;
 }
 
-export async function workerTick() {
+export async function workerTick(): Promise<void> {
   const apiKey = process.env.MODEL_ACCESS_KEY;
   if (!apiKey) {
     console.warn('MODEL_ACCESS_KEY not set; skipping scoring tick');
@@ -54,17 +57,17 @@ export async function workerTick() {
   await submitPendingBatch(apiKey);
 }
 
-async function countInFlight() {
+async function countInFlight(): Promise<number> {
   const db = getPool();
-  const result = await db.query(
+  const result = await db.query<{ n: number }>(
     `SELECT COUNT(*)::int AS n FROM feedback_entries WHERE status = 'submitted'`,
   );
   return result.rows[0].n;
 }
 
-async function resolveSubmittedBatches(apiKey) {
+async function resolveSubmittedBatches(apiKey: string): Promise<void> {
   const db = getPool();
-  const batches = await db.query(
+  const batches = await db.query<{ batch_id: string }>(
     `SELECT DISTINCT batch_id FROM feedback_entries
      WHERE status = 'submitted' AND batch_id IS NOT NULL`,
   );
@@ -86,21 +89,22 @@ async function resolveSubmittedBatches(apiKey) {
   }
 }
 
-async function applyCompletedBatch(apiKey, batchId) {
+async function applyCompletedBatch(apiKey: string, batchId: string): Promise<void> {
   const db = getPool();
-  let text;
+  let text: string;
   try {
     text = await downloadBatchOutput(apiKey, batchId);
   } catch (err) {
-    console.warn(`batch ${batchId} results not ready yet:`, err.message);
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn(`batch ${batchId} results not ready yet:`, message);
     return;
   }
   const lines = text.split('\n').filter((l) => l.trim());
 
   for (const line of lines) {
-    let row;
+    let row: BatchResultLine;
     try {
-      row = JSON.parse(line);
+      row = JSON.parse(line) as BatchResultLine;
     } catch (err) {
       console.error('bad result line', err);
       continue;
@@ -129,11 +133,11 @@ async function applyCompletedBatch(apiKey, batchId) {
   }
 }
 
-async function submitPendingBatch(apiKey) {
+async function submitPendingBatch(apiKey: string): Promise<void> {
   const db = getPool();
   const model = process.env.MODEL_NAME || 'o3-mini';
 
-  const pending = await db.query(
+  const pending = await db.query<{ id: string; feedback: string }>(
     `SELECT id, feedback FROM feedback_entries
      WHERE status = 'pending'
      ORDER BY created_at ASC
@@ -142,7 +146,7 @@ async function submitPendingBatch(apiKey) {
   );
   if (pending.rows.length === 0) return;
 
-  const lines = [];
+  const lines: string[] = [];
   for (const row of pending.rows) {
     const customId = String(row.id);
     lines.push(

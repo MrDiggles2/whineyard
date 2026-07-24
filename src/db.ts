@@ -2,9 +2,9 @@ import pg from 'pg';
 
 const { Pool } = pg;
 
-let pool;
+let pool: pg.Pool | undefined;
 
-export function getPool() {
+export function getPool(): pg.Pool {
   if (!pool) {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
@@ -18,7 +18,7 @@ export function getPool() {
   return pool;
 }
 
-export async function ensureSchema() {
+export async function ensureSchema(): Promise<void> {
   const db = getPool();
   await db.query(`
     CREATE TABLE IF NOT EXISTS feedback_entries (
@@ -50,9 +50,9 @@ export async function ensureSchema() {
   `);
 }
 
-export async function closePool() {
+export async function closePool(): Promise<void> {
   if (pool) {
     await pool.end();
-    pool = null;
+    pool = undefined;
   }
 }

@@ -1,13 +1,14 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { getPool } from '../db.js';
+import type { FeedbackDto, FeedbackRow } from '../types/feedback.js';
 import { isUuid } from '../uuid.js';
 
 const SORT_COLUMNS = new Set(['created_at', 'actionability', 'category']);
 
-export function createFeedbackRouter() {
+export function createFeedbackRouter(): Router {
   const router = Router();
 
-  router.post('/feedback/:formUuid', async (req, res) => {
+  router.post('/feedback/:formUuid', async (req: Request, res: Response) => {
     try {
       const { formUuid } = req.params;
       if (!isUuid(formUuid)) {
@@ -19,13 +20,13 @@ export function createFeedbackRouter() {
         return res.status(400).json({ error: 'feedback is required' });
       }
 
-      let tags = req.body?.tags ?? [];
+      const tags: unknown = req.body?.tags ?? [];
       if (!Array.isArray(tags) || tags.some((t) => typeof t !== 'string')) {
         return res.status(400).json({ error: 'tags must be an array of strings' });
       }
 
       const db = getPool();
-      const result = await db.query(
+      const result = await db.query<FeedbackRow>(
         `INSERT INTO feedback_entries (form_uuid, feedback, tags, status)
          VALUES ($1, $2, $3::jsonb, 'pending')
          RETURNING *`,
@@ -39,7 +40,7 @@ export function createFeedbackRouter() {
     }
   });
 
-  router.get('/api/feedback', async (req, res) => {
+  router.get('/api/feedback', async (req: Request, res: Response) => {
     try {
       const {
         tag,
@@ -51,7 +52,7 @@ export function createFeedbackRouter() {
         pageSize = '20',
       } = req.query;
 
-      if (!SORT_COLUMNS.has(sort)) {
+      if (typeof sort !== 'string' || !SORT_COLUMNS.has(sort)) {
         return res.status(400).json({ error: 'invalid sort' });
       }
       const sortOrder = String(order).toLowerCase() === 'asc' ? 'ASC' : 'DESC';
@@ -59,8 +60,8 @@ export function createFeedbackRouter() {
       const size = Math.min(100, Math.max(1, parseInt(String(pageSize), 10) || 20));
       const offset = (pageNum - 1) * size;
 
-      const where = [];
-      const params = [];
+      const where: string[] = [];
+      const params: unknown[] = [];
 
       if (tag) {
         params.push(JSON.stringify([String(tag)]));
@@ -82,7 +83,7 @@ export function createFeedbackRouter() {
       const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
       const db = getPool();
-      const countResult = await db.query(
+      const countResult = await db.query<{ total: number }>(
         `SELECT COUNT(*)::int AS total FROM feedback_entries ${whereSql}`,
         params,
       );
@@ -90,7 +91,7 @@ export function createFeedbackRouter() {
 
       params.push(size);
       params.push(offset);
-      const listResult = await db.query(
+      const listResult = await db.query<FeedbackRow>(
         `SELECT * FROM feedback_entries
          ${whereSql}
          ORDER BY ${sort} ${sortOrder} NULLS LAST
@@ -113,7 +114,7 @@ export function createFeedbackRouter() {
   return router;
 }
 
-export function mapRow(row) {
+export function mapRow(row: FeedbackRow): FeedbackDto {
   return {
     id: row.id,
     formUuid: row.form_uuid,
@@ -129,10 +130,20 @@ export function mapRow(row) {
   };
 }
 
+export interface ListFilterInput {
+  tag?: string;
+  category?: string;
+  actionability?: string | number;
+}
+
 /** Build WHERE + params for list filters (exported for tests). */
-export function buildListFilters({ tag, category, actionability } = {}) {
-  const where = [];
-  const params = [];
+export function buildListFilters({
+  tag,
+  category,
+  actionability,
+}: ListFilterInput = {}): { where: string[]; params: unknown[]; whereSql: string } {
+  const where: string[] = [];
+  const params: unknown[] = [];
   if (tag) {
     params.push(JSON.stringify([String(tag)]));
     where.push(`tags @> $${params.length}::jsonb`);

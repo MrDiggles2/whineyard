@@ -33,7 +33,10 @@ test('buildJsonlLine uses custom_id and model input', () => {
     model: 'o3-mini',
     input: 'hello',
   });
-  const parsed = JSON.parse(line);
+  const parsed = JSON.parse(line) as {
+    custom_id: string;
+    body: { model: string; input: string };
+  };
   assert.equal(parsed.custom_id, 'req-1');
   assert.equal(parsed.body.model, 'o3-mini');
   assert.equal(parsed.body.input, 'hello');

@@ -4,31 +4,35 @@ POC that ingests DigitalOcean DBaaS exit feedback, stores it in managed Postgres
 
 ## Stack
 
-- One Node/Express App Platform service (API + static UI + in-process scoring worker)
+- TypeScript (Node/Express) App Platform service — API + static UI + in-process scoring worker
 - Managed Postgres
-- Batches client: [`@digitalocean/dots`](https://github.com/digitalocean/dots) `InferenceClient` (Node ≥ 20.10; Docker image uses Node 22)
+- Batches client: [`@digitalocean/dots`](https://github.com/digitalocean/dots) `InferenceClient` (Node ≥ 20.10 / `.nvmrc` 22)
 - Scoring prompt: [`prompt.md`](prompt.md)
+- UI remains plain HTML/JS in `public/`
 
 ## Local run
 
 ```bash
+nvm use   # or Node 22+
 npm install
-export DATABASE_URL='postgres://user:pass@localhost:5432/ane_safari'
-export MODEL_ACCESS_KEY='...'   # DO Inference key
-# optional: DATABASE_SSL=false for local Postgres without TLS
-npm start
+cp .env.example .env   # then edit DATABASE_URL / MODEL_ACCESS_KEY
+npm run dev            # tsx; loads .env from project root
+# or: npm run build && npm start
 ```
+
+Existing shell env vars still win over `.env` (dotenv default). Do not commit `.env`.
 
 - UI: http://localhost:8080/
 - Ingest: `POST /feedback/<uuid>` with `{ "feedback": "...", "tags": ["a"] }`
 
 ```bash
 npm test
+npm run typecheck
 ```
 
 ## Deploy (DigitalOcean console)
 
-No doctl required.
+No doctl required. The Dockerfile multi-stage builds TypeScript to `dist/`.
 
 1. Push this repo to GitHub (or use a container image built from the `Dockerfile`).
 2. In **Apps** → **Create App**, choose the repo (or Dockerfile source).

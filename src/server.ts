@@ -1,3 +1,4 @@
+import './loadEnv.js';
 import express from 'express';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -16,7 +17,7 @@ export function createApp() {
   return app;
 }
 
-async function main() {
+async function main(): Promise<void> {
   await ensureSchema();
   const app = createApp();
   startWorker();
@@ -26,7 +27,7 @@ async function main() {
 }
 
 const isDirect =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+  process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isDirect) {
   main().catch((err) => {
     console.error(err);
