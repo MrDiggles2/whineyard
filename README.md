@@ -21,9 +21,6 @@ docker compose up --build
 
 - App: http://localhost:8080/
 - Postgres: `localhost:5432` (user/password/db: `ane` / `ane` / `whineyard`)
-- Schema is created automatically on app boot (`ensureSchema`)
-
-Stop with `Ctrl+C`, or `docker compose down`. Add `-v` to wipe the DB volume.
 
 ### Node on the host
 
@@ -36,14 +33,14 @@ npm run dev            # tsx; loads .env from project root
 # or: npm run build && npm start
 ```
 
-Existing shell env vars still win over `.env` (dotenv default). Do not commit `.env`.
-
-- UI: http://localhost:8080/
-- Ingest: `POST /feedback/<uuid>` with `{ "feedback": "...", "tags": ["a"] }`
+### Submit feedback
 
 ```bash
-npm test
-npm run typecheck
+curl \
+   -X POST \
+   --header "Content-Type: application/json" \
+   --data '{ "feedback": "I want to use PostGIS but it doesnt work" , "tags": [ "long-lived", "pricing" ]}' \
+   http://localhost:8080/api/feedback/e1f74eb4-e763-4731-8a2c-e890813f450e 
 ```
 
 ## Deploy (DigitalOcean console)

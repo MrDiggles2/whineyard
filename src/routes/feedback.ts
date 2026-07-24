@@ -8,7 +8,7 @@ const SORT_COLUMNS = new Set(['created_at', 'actionability', 'category']);
 export function createFeedbackRouter(): Router {
   const router = Router();
 
-  router.post('/feedback/:formUuid', async (req: Request, res: Response) => {
+  router.post('/api/feedback/:formUuid', async (req: Request, res: Response) => {
     try {
       const { formUuid } = req.params;
       if (!isUuid(formUuid)) {
