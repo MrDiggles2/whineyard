@@ -8,12 +8,28 @@
 </head>
 <body>
   <main>
-    <h1>The Whineyard 🍷</h1>
-    <p class="tagline">A place where complaints age to wisdom.</p>
+    <header class="page-header">
+      <div>
+        <h1>The Whineyard 🍷</h1>
+        <p class="tagline">A place where complaints age to wisdom.</p>
+      </div>
+      <nav class="page-nav">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="/" aria-current="page">Table</a>
+      </nav>
+    </header>
     <form id="filters" class="filters">
       <label>
         Keyword
         <input name="q" type="text" placeholder="search feedback" />
+      </label>
+      <label>
+        From
+        <input name="from" type="date" />
+      </label>
+      <label>
+        To
+        <input name="to" type="date" />
       </label>
       <label>
         Tag

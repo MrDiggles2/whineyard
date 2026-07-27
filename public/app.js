@@ -10,6 +10,15 @@ const metaEl = document.getElementById('meta');
 const prevBtn = document.getElementById('prev');
 const nextBtn = document.getElementById('next');
 
+function hydrateFiltersFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  for (const [key, value] of params.entries()) {
+    const field = form.elements.namedItem(key);
+    if (!field || value === '') continue;
+    if ('value' in field) field.value = value;
+  }
+}
+
 function paramsFromForm() {
   const data = new FormData(form);
   const params = new URLSearchParams();
@@ -143,4 +152,5 @@ nextBtn.addEventListener('click', () => {
   }
 });
 
+hydrateFiltersFromUrl();
 load();

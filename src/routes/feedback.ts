@@ -54,6 +54,8 @@ export function createFeedbackRouter(): Router {
         actionability,
         q,
         status,
+        from,
+        to,
         sort = 'created_at',
         order = 'desc',
         page = '1',
@@ -80,6 +82,8 @@ export function createFeedbackRouter(): Router {
               : undefined,
           q: q ? String(q) : undefined,
           status: status ? String(status) : undefined,
+          from: from ? String(from) : undefined,
+          to: to ? String(to) : undefined,
         }));
       } catch (err) {
         return res.status(400).json({
@@ -141,6 +145,29 @@ export interface ListFilterInput {
   actionability?: string | number;
   q?: string;
   status?: string;
+  from?: string;
+  to?: string;
+}
+
+/** Parse YYYY-MM-DD or ISO into UTC start-of-day (for list from/to). */
+function parseListDate(value: string): Date {
+  const trimmed = value.trim();
+  const dayOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+  if (dayOnly) {
+    const y = Number(dayOnly[1]);
+    const m = Number(dayOnly[2]);
+    const d = Number(dayOnly[3]);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== m - 1 || dt.getUTCDate() !== d) {
+      throw new Error('invalid date');
+    }
+    return dt;
+  }
+  const dt = new Date(trimmed);
+  if (Number.isNaN(dt.getTime())) {
+    throw new Error('invalid date');
+  }
+  return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
 }
 
 /** Escape LIKE/ILIKE metacharacters (and backslash) for use with ESCAPE '\\'. */
@@ -155,6 +182,8 @@ export function buildListFilters({
   actionability,
   q,
   status,
+  from,
+  to,
 }: ListFilterInput = {}): { where: string[]; params: unknown[]; whereSql: string } {
   const where: string[] = [];
   const params: unknown[] = [];
@@ -185,6 +214,17 @@ export function buildListFilters({
     }
     params.push(s);
     where.push(`status = $${params.length}`);
+  }
+  if (from !== undefined && String(from).trim() !== '') {
+    const fromDate = parseListDate(String(from));
+    params.push(fromDate);
+    where.push(`created_at >= $${params.length}`);
+  }
+  if (to !== undefined && String(to).trim() !== '') {
+    const toInclusive = parseListDate(String(to));
+    const toExclusive = new Date(toInclusive.getTime() + 24 * 60 * 60 * 1000);
+    params.push(toExclusive);
+    where.push(`created_at < $${params.length}`);
   }
   return { where, params, whereSql: where.length ? `WHERE ${where.join(' AND ')}` : '' };
 }

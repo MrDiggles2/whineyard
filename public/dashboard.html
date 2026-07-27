@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Whineyard — Dashboard</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <main class="dashboard">
+    <header class="page-header">
+      <div>
+        <h1>The Whineyard 🍷</h1>
+        <p class="tagline">Feedback volume and actionability trends.</p>
+      </div>
+      <nav class="page-nav">
+        <a href="/dashboard.html" aria-current="page">Dashboard</a>
+        <a href="/">Table</a>
+      </nav>
+    </header>
+
+    <form id="controls" class="filters">
+      <label>
+        From
+        <input name="from" type="date" required />
+      </label>
+      <label>
+        To
+        <input name="to" type="date" required />
+      </label>
+      <div class="preset-row">
+        <button type="button" data-preset="7">7d</button>
+        <button type="button" data-preset="30">30d</button>
+        <button type="button" data-preset="90">90d</button>
+      </div>
+      <label class="checkbox-label">
+        <input name="includeUnscored" type="checkbox" />
+        Include unscored
+      </label>
+      <label class="checkbox-label">
+        <input name="shareMode" type="checkbox" />
+        Reason trends as share
+      </label>
+      <button type="submit">Apply</button>
+      <button type="button" id="exportCsv">Export CSV</button>
+    </form>
+
+    <p id="meta" class="meta"></p>
+
+    <section class="kpi-row">
+      <div class="kpi">
+        <span class="kpi-label">Total volume</span>
+        <span id="kpiVolume" class="kpi-value">—</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Avg actionability</span>
+        <span id="kpiActionability" class="kpi-value">—</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi-label">Granularity</span>
+        <span id="kpiGranularity" class="kpi-value">—</span>
+      </div>
+    </section>
+
+    <section class="chart-grid">
+      <div class="chart-panel">
+        <h2>Volume by reason</h2>
+        <canvas id="byReasonChart"></canvas>
+      </div>
+      <div class="chart-panel">
+        <h2>Volume over time</h2>
+        <canvas id="volumeOverTimeChart"></canvas>
+      </div>
+      <div class="chart-panel chart-panel--wide">
+        <h2>Reason trends</h2>
+        <canvas id="reasonTrendsChart"></canvas>
+      </div>
+      <div class="chart-panel">
+        <h2>Actionability distribution</h2>
+        <canvas id="actionabilityDistChart"></canvas>
+      </div>
+      <div class="chart-panel">
+        <h2>
+          Actionability over time
+          <select id="actionabilityReason" class="inline-select">
+            <option value="">All reasons</option>
+          </select>
+        </h2>
+        <canvas id="actionabilityTrendChart"></canvas>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <h2>Period over period</h2>
+      <p id="popMeta" class="meta"></p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Reason</th>
+              <th>Current</th>
+              <th>Prior</th>
+              <th>% Change</th>
+            </tr>
+          </thead>
+          <tbody id="popRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+  <script src="/dashboard.js"></script>
+</body>
+</html>

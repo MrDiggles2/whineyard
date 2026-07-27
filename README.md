@@ -65,11 +65,15 @@ Keep **instance count = 1**. The worker is in-process with no multi-instance loc
 2. `POST /feedback/550e8400-e29b-41d4-a716-446655440000` with a short feedback body → `201`.
 3. Refresh UI — row appears with `status=pending`.
 4. Wait for the worker (~60s + batch runtime) — status becomes `submitted`, then `scored` with category and actionability 1–5.
-5. Filter by keyword / category / actionability / tag / status; paginate if you have enough rows.
+5. Filter by keyword / category / actionability / tag / status / date range; paginate if you have enough rows.
+6. Open `/dashboard.html` — volume and actionability charts load for the last 30 days (scored-only by default).
+7. Click a chart segment — table opens pre-filtered via query params.
 
 ## API
 
 | Method | Path | Notes |
 |--------|------|--------|
 | `POST` | `/feedback/:formUuid` | `formUuid` must be a UUID; body `{ feedback, tags }` |
-| `GET` | `/api/feedback` | Query: `q`, `tag`, `category`, `status`, `actionability`, `sort`, `order`, `page`, `pageSize` |
+| `GET` | `/api/feedback` | Query: `q`, `tag`, `category`, `status`, `actionability`, `from`, `to`, `sort`, `order`, `page`, `pageSize` |
+| `GET` | `/api/analytics` | Query: `from`, `to`, `includeUnscored` — aggregated volume, reason trends, PoP, actionability |
+| `GET` | `/api/analytics/export` | Same filters as analytics; CSV of aggregates (not raw rows) |

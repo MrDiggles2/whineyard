@@ -3,6 +3,7 @@ import express from 'express';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { ensureSchema } from './db.js';
+import { createAnalyticsRouter } from './routes/analytics.js';
 import { createFeedbackRouter } from './routes/feedback.js';
 import { startWorker } from './worker.js';
 
@@ -13,6 +14,7 @@ export function createApp() {
   const app = express();
   app.use(express.json({ limit: '100kb' }));
   app.use(createFeedbackRouter());
+  app.use(createAnalyticsRouter());
   app.use(express.static(join(__dirname, '..', 'public')));
   return app;
 }
