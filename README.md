@@ -39,7 +39,7 @@ npm run dev            # tsx; loads .env from project root
 curl \
    -X POST \
    --header "Content-Type: application/json" \
-   --data '{ "feedback": "I want to use PostGIS but it doesnt work" , "tags": [ "long-lived", "pricing" ]}' \
+   --data '{ "feedback": "I want to use PostGIS but it doesnt work" , "tags": [ "long-lived", "pricing" ], "timestamp": "2026-01-08 12:05:27.499"}' \
    http://localhost:8080/api/feedback/e1f74eb4-e763-4731-8a2c-e890813f450e 
 ```
 

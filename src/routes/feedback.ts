@@ -31,12 +31,14 @@ export function createFeedbackRouter(): Router {
         return res.status(400).json({ error: 'tags must be an array of strings' });
       }
 
+      const timestamp = new Date(req.body?.timestamp);
+
       const db = getPool();
       const result = await db.query<FeedbackRow>(
-        `INSERT INTO feedback_entries (form_uuid, feedback, tags, status)
-         VALUES ($1, $2, $3::jsonb, 'pending')
+        `INSERT INTO feedback_entries (form_uuid, feedback, tags, status, created_at)
+         VALUES ($1, $2, $3::jsonb, 'pending', $4)
          RETURNING *`,
-        [formUuid, feedback, JSON.stringify(tags)],
+        [formUuid, feedback, JSON.stringify(tags), timestamp],
       );
 
       return res.status(201).json(mapRow(result.rows[0]));
